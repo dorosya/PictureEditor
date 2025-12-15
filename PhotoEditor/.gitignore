@@ -1,0 +1,10 @@
+/bin/
+/obj/
+.vs/
+*.user
+*.suo
+*.csproj.user
+.DS_Store
+*.exe
+*.dll
+*.pdb
