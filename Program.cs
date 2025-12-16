@@ -103,7 +103,8 @@ namespace PhotoEditor
 
         static void PrintHelp()
         {
-            Console.WriteLine("\nКоманды:");
+            Console.WriteLine("=== Справка по командам Photo Editor CLI ===\n");
+
             Console.WriteLine("add <путь>                  — добавить фото");
             Console.WriteLine("list                        — список фото");
             Console.WriteLine("open <id>                   — открыть фото в Windows");
@@ -115,8 +116,10 @@ namespace PhotoEditor
             Console.WriteLine("rotate <id> <угол>          — повернуть изображение (градусы)");
             Console.WriteLine("pixel <id> <x> <y> <r> <g> <b> — изменить цвет пикселя");
             Console.WriteLine("collage <id1,id2,...> <путь> — создать коллаж и сохранить");
+            Console.WriteLine("help                        — вывести справку по командам");
             Console.WriteLine("exit                        — выход с сохранением");
         }
+
 
         static void AddPhoto(string[] parts, List<Photo> photos)
         {
