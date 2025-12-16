@@ -2,11 +2,12 @@
 using System.Drawing;
 using System.IO;
 using System.Text.Json.Serialization;
+using PhotoEditor.Interfaces;
 
 namespace PhotoEditor.Models
 {
     [Serializable]
-    public class Photo
+    public class Photo : IPhoto
     {
         public string FilePath { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
@@ -50,14 +51,15 @@ namespace PhotoEditor.Models
             Image = null;
         }
 
-        public override string ToString()
-        {
-            return $"{Name} ({FilePath})";
-        }
         public void SetImage(Bitmap bitmap)
         {
             Image?.Dispose();
             Image = bitmap;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name} ({FilePath})";
         }
     }
 }
