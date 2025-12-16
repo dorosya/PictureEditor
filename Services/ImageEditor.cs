@@ -3,25 +3,21 @@ using System.Drawing;
 
 namespace PhotoEditor
 {
-    /// Класс для редактирования изображений
+    /// <summary>
+    /// Класс редактирования изображений
+    /// </summary>
     public class ImageEditor
     {
-        /// Загрузка изображения в объект Photo
-        public void LoadImage(Photo photo)
-        {
-            if (!File.Exists(photo.FilePath))
-                throw new FileNotFoundException("Файл изображения не найден");
+        private readonly Services _services = new Services();
 
-            photo.Image = new Bitmap(photo.FilePath);
-        }
-
+        /// <summary>
         /// Обрезка изображения
+        /// </summary>
         public void Crop(Photo photo, Rectangle area)
         {
-            if (photo.Image == null)
-                throw new InvalidOperationException("Изображение не загружено");
+            _services.EnsureImageLoaded(photo);
 
-            Bitmap source = photo.Image;
+            Bitmap source = photo.Image!;
             Bitmap cropped = new Bitmap(area.Width, area.Height);
 
             using (Graphics g = Graphics.FromImage(cropped))
@@ -36,14 +32,14 @@ namespace PhotoEditor
             photo.Image = cropped;
         }
 
-
+        /// <summary>
         /// Поворот изображения на угол
+        /// </summary>
         public void Rotate(Photo photo, float angle)
         {
-            if (photo.Image == null)
-                throw new InvalidOperationException("Изображение не загружено");
+            _services.EnsureImageLoaded(photo);
 
-            Bitmap source = photo.Image;
+            Bitmap source = photo.Image!;
             Bitmap rotated = new Bitmap(source.Width, source.Height);
 
             using (Graphics g = Graphics.FromImage(rotated))
@@ -57,14 +53,15 @@ namespace PhotoEditor
             photo.Image = rotated;
         }
 
-
+        /// <summary>
         /// Изменение одного пикселя
+        /// </summary>
         public void ChangePixel(Photo photo, int x, int y, Color color)
         {
-            if (photo.Image == null)
-                throw new InvalidOperationException("Изображение не загружено");
+            _services.EnsureImageLoaded(photo);
 
-            if (x < 0 || y < 0 || x >= photo.Image.Width || y >= photo.Image.Height)
+            if (x < 0 || y < 0 ||
+                x >= photo.Image!.Width || y >= photo.Image.Height)
                 throw new ArgumentOutOfRangeException();
 
             photo.Image.SetPixel(x, y, color);
