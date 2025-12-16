@@ -1,110 +1,137 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using PhotoEditor.Models;
+using PhotoEditor.Utils;
 
 namespace PhotoEditor
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            Console.WriteLine("=== Photo Editor ===");
+            Console.WriteLine("=== Photo Editor (CLI) ===");
 
-            try
+            List<Photo> photos = StateManager.LoadState();
+
+            PrintHelp();
+
+            while (true)
             {
-                // Загрузка состояния
-                Console.WriteLine("Загрузка состояния...");
-                List<Photo> photos = StateManager.LoadState();
+                Console.Write("\n> ");
+                string input = Console.ReadLine()?.Trim() ?? "";
 
-                if (photos.Count == 0)
+                if (string.IsNullOrWhiteSpace(input))
+                    continue;
+
+                string[] parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                string command = parts[0];
+
+                try
                 {
-                    Console.WriteLine("Список фото пуст. Добавьте фото командой 'add'");
-                }
-                else
-                {
-                    Console.WriteLine($"Готово к работе. Фото в памяти: {photos.Count}");
-                }
-
-                // Меню команд
-                Console.WriteLine("\n=== Команды ===");
-                Console.WriteLine("add [имя]  - добавить фото");
-                Console.WriteLine("list - список фото");
-                Console.WriteLine("save - сохранить состояние");
-                Console.WriteLine("clear - очистить состояние");
-                Console.WriteLine("exit - выход с сохранением");
-                Console.WriteLine("================\n");
-
-                while (true)
-                {
-                    Console.Write("> ");
-                    string input = Console.ReadLine()?.Trim() ?? "";
-
-                    if (string.IsNullOrWhiteSpace(input))
-                        continue;
-
-                    if (input == "exit")
+                    switch (command)
                     {
-                        Console.WriteLine("\nСохранение состояния...");
-                        StateManager.SaveState(photos);
-                        Console.WriteLine("Выход...");
-                        break;
-                    }
-                    else if (input == "list")
-                    {
-                        if (photos.Count == 0)
-                        {
-                            Console.WriteLine("Список фото пуст");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Всего фото: {photos.Count}");
-                            for (int i = 0; i < photos.Count; i++)
-                            {
-                                Console.Write($"{i + 1}. ");
-                                photos[i].Display();
-                            }
-                        }
-                    }
-                    else if (input == "save")
-                    {
-                        StateManager.SaveState(photos);
-                    }
-                    else if (input == "clear")
-                    {
-                        Console.Write("Удалить все фото? (y/n): ");
-                        if (Console.ReadLine()?.ToLower() == "y")
-                        {
+                        case "add":
+                            AddPhoto(parts, photos);
+                            break;
+
+                        case "list":
+                            ListPhotos(photos);
+                            break;
+
+                        case "open":
+                            OpenPhoto(parts, photos);
+                            break;
+
+                        case "save":
+                            StateManager.SaveState(photos);
+                            break;
+
+                        case "clear":
                             photos.Clear();
-                            StateManager.DeleteState();
-                            Console.WriteLine("Все фото удалены");
-                        }
-                    }
-                    else if (input.StartsWith("add "))
-                    {
-                        string name = input.Substring(4).Trim();
-                        if (string.IsNullOrWhiteSpace(name))
-                        {
-                            Console.WriteLine("Укажите имя файла: add example.jpg");
-                        }
-                        else
-                        {
-                            photos.Add(new Photo(name));
-                            Console.WriteLine($"Добавлено: {name}");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Неизвестная команда. Доступно: add, list, save, clear, exit");
+                            StateManager.ClearState();
+                            break;
+
+                        case "exit":
+                            StateManager.SaveState(photos);
+                            return;
+
+                        case "help":
+                            PrintHelp();
+                            break;
+
+                        default:
+                            Console.WriteLine("Неизвестная команда. help — список команд");
+                            break;
                     }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ошибка: {ex.Message}");
+                }
             }
-            catch (Exception ex)
+        }
+
+        static void PrintHelp()
+        {
+            Console.WriteLine("\nКоманды:");
+            Console.WriteLine("add <путь>   — добавить фото");
+            Console.WriteLine("list        — список фото");
+            Console.WriteLine("open <id>   — открыть фото в Windows");
+            Console.WriteLine("save        — сохранить состояние");
+            Console.WriteLine("clear       — очистить состояние");
+            Console.WriteLine("exit        — выход с сохранением");
+        }
+
+        static void AddPhoto(string[] parts, List<Photo> photos)
+        {
+            if (parts.Length < 2)
             {
-                Console.WriteLine($" Критическая ошибка: {ex.Message}");
-                Console.WriteLine("Программа завершена");
+                Console.WriteLine("Использование: add <путь_к_файлу>");
+                return;
             }
 
-            Console.WriteLine("\nНажмите любую клавишу...");
-            Console.ReadKey();
+            Photo photo = new Photo(parts[1]);
+            photos.Add(photo);
+
+            Console.WriteLine($"Добавлено: {photo.Name}");
+        }
+
+        static void ListPhotos(List<Photo> photos)
+        {
+            if (photos.Count == 0)
+            {
+                Console.WriteLine("Список фото пуст");
+                return;
+            }
+
+            for (int i = 0; i < photos.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {photos[i]}");
+            }
+        }
+
+        static void OpenPhoto(string[] parts, List<Photo> photos)
+        {
+            if (parts.Length < 2 || !int.TryParse(parts[1], out int index))
+            {
+                Console.WriteLine("Использование: open <id>");
+                return;
+            }
+
+            if (index < 1 || index > photos.Count)
+            {
+                Console.WriteLine("Неверный ID");
+                return;
+            }
+
+            Photo photo = photos[index - 1];
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = photo.FilePath,
+                UseShellExecute = true
+            });
         }
     }
 }

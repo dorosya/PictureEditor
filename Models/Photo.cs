@@ -1,53 +1,63 @@
 ﻿using System;
-using System.Text.Json;
 using System.Drawing;
-using System.Text.Json.Serialization;
 using System.IO;
+using System.Text.Json.Serialization;
 
-namespace PhotoEditor
+namespace PhotoEditor.Models
 {
     [Serializable]
     public class Photo
     {
-        public string FilePath { get; set; } = "";
-        public string Name { get; set; } = "";
+        public string FilePath { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
-        
-        [JsonIgnore] 
-        public Bitmap? Image { get; set; }
+        [JsonIgnore]
+        public Bitmap? Image { get; private set; }
 
         public Photo() { }
 
-        public Photo(string path)
+        public Photo(string filePath)
         {
-            FilePath = path;
-            Name = Path.GetFileName(path);
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException("Файл изображения не найден", filePath);
+
+            FilePath = Path.GetFullPath(filePath);
+            Name = Path.GetFileName(filePath);
         }
 
-        
-        public void SaveToFile(string filePath)
+        public void LoadImage()
         {
-            string json = JsonSerializer.Serialize(this);
-            File.WriteAllText(filePath, json);
-            Console.WriteLine($"Фото сохранено в JSON: {filePath}");
+            if (!File.Exists(FilePath))
+                throw new FileNotFoundException("Файл изображения не найден", FilePath);
+
+            Image?.Dispose();
+            Image = new Bitmap(FilePath);
         }
 
-       
-        public static Photo LoadFromFile(string filePath)
+        public void SaveImage(string outputPath)
         {
-            string json = File.ReadAllText(filePath);
-            Photo photo = JsonSerializer.Deserialize<Photo>(json)!;
-            Console.WriteLine($"Фото загружено из JSON: {photo.Name}");
-            return photo;
+            if (Image == null)
+                throw new InvalidOperationException("Изображение не загружено");
+
+            Image.Save(outputPath);
+            FilePath = Path.GetFullPath(outputPath);
+            Name = Path.GetFileName(outputPath);
         }
 
-        public void Display()
+        public void UnloadImage()
         {
-            Console.WriteLine($" {Name}");
-            if (File.Exists(FilePath))
-            {
-                Console.WriteLine($"  Путь: {FilePath}");
-            }
+            Image?.Dispose();
+            Image = null;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name} ({FilePath})";
+        }
+        public void SetImage(Bitmap bitmap)
+        {
+            Image?.Dispose();
+            Image = bitmap;
         }
     }
 }

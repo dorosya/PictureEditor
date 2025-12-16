@@ -1,21 +1,14 @@
 using System;
 using System.Drawing;
+using PhotoEditor.Models;
 
-namespace PhotoEditor
+namespace PhotoEditor.Services
 {
-    /// <summary>
-    /// Класс редактирования изображений
-    /// </summary>
     public class ImageEditor
     {
-        private readonly Services _services = new Services();
-
-        /// <summary>
-        /// Обрезка изображения
-        /// </summary>
         public void Crop(Photo photo, Rectangle area)
         {
-            _services.EnsureImageLoaded(photo);
+            EnsureLoaded(photo);
 
             Bitmap source = photo.Image!;
             Bitmap cropped = new Bitmap(area.Width, area.Height);
@@ -29,15 +22,12 @@ namespace PhotoEditor
                     GraphicsUnit.Pixel);
             }
 
-            photo.Image = cropped;
+            photo.SetImage(cropped);
         }
 
-        /// <summary>
-        /// Поворот изображения на угол
-        /// </summary>
         public void Rotate(Photo photo, float angle)
         {
-            _services.EnsureImageLoaded(photo);
+            EnsureLoaded(photo);
 
             Bitmap source = photo.Image!;
             Bitmap rotated = new Bitmap(source.Width, source.Height);
@@ -50,21 +40,24 @@ namespace PhotoEditor
                 g.DrawImage(source, new Point(0, 0));
             }
 
-            photo.Image = rotated;
+            photo.SetImage(rotated);
         }
 
-        /// <summary>
-        /// Изменение одного пикселя
-        /// </summary>
         public void ChangePixel(Photo photo, int x, int y, Color color)
         {
-            _services.EnsureImageLoaded(photo);
+            EnsureLoaded(photo);
 
             if (x < 0 || y < 0 ||
                 x >= photo.Image!.Width || y >= photo.Image.Height)
                 throw new ArgumentOutOfRangeException();
 
             photo.Image.SetPixel(x, y, color);
+        }
+
+        private void EnsureLoaded(Photo photo)
+        {
+            if (photo.Image == null)
+                throw new InvalidOperationException("РР·РѕР±СЂР°Р¶РµРЅРёРµ РЅРµ Р·Р°РіСЂСѓР¶РµРЅРѕ");
         }
     }
 }
