@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoEditor", "PhotoEditor.csproj", "{8C36CF5F-B164-8C32-248C-68126DBAE32B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PictureEditor", "PictureEditor.csproj", "{8C36CF5F-B164-8C32-248C-68126DBAE32B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
