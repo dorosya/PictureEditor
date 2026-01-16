@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Imaging; // ← и это тоже!
+using System.Drawing.Imaging;
 using System.IO;
 using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
@@ -18,7 +18,6 @@ namespace PhotoEditor.Models
         [JsonIgnore]
         public Bitmap? Image { get; private set; }
 
-        // НОВОЕ: Свойство для WPF
         [JsonIgnore]
         public BitmapImage? BitmapImage { get; private set; }
 
@@ -92,7 +91,6 @@ namespace PhotoEditor.Models
             UpdateBitmapImage();
         }
 
-        // НОВЫЙ МЕТОД: Устанавливает изображение из BitmapImage
         public void SetImage(BitmapImage bitmapImage)
         {
             if (bitmapImage == null)
@@ -102,7 +100,7 @@ namespace PhotoEditor.Models
                 return;
             }
 
-            // Конвертируем BitmapImage в Bitmap
+    
             BitmapEncoder encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
 
