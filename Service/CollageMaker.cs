@@ -1,54 +1,78 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Windows.Media.Imaging;
+using System.IO;
 using PhotoEditor.Interfaces;
 
 namespace PhotoEditor.Services
 {
     public class CollageMaker : ICollageMaker
     {
-        public Bitmap CreateCollage(List<Bitmap> images)
+        public BitmapImage CreateCollage(List<BitmapImage> images)
         {
             if (images == null || images.Count == 0)
                 throw new ArgumentException("Список изображений пуст");
 
             int count = images.Count;
-
-            // Размер сетки (например, 4 картинки → 2x2)
             int gridSize = (int)Math.Ceiling(Math.Sqrt(count));
-
-            // Размер ячейки — по максимальному изображению
             int cellWidth = 0;
             int cellHeight = 0;
 
             foreach (var img in images)
             {
-                cellWidth = Math.Max(cellWidth, img.Width);
-                cellHeight = Math.Max(cellHeight, img.Height);
+                cellWidth = Math.Max(cellWidth, img.PixelWidth);
+                cellHeight = Math.Max(cellHeight, img.PixelHeight);
             }
 
             int collageWidth = gridSize * cellWidth;
             int collageHeight = gridSize * cellHeight;
 
-            Bitmap collage = new Bitmap(collageWidth, collageHeight);
+          
+            var renderBitmap = new RenderTargetBitmap(
+                collageWidth, collageHeight, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
 
-            using (Graphics g = Graphics.FromImage(collage))
+            var drawingVisual = new System.Windows.Media.DrawingVisual();
+            using (var drawingContext = drawingVisual.RenderOpen())
             {
-                g.Clear(Color.White);
+                drawingContext.DrawRectangle(
+                    System.Windows.Media.Brushes.White,
+                    null,
+                    new System.Windows.Rect(0, 0, collageWidth, collageHeight));
 
                 for (int i = 0; i < count; i++)
                 {
                     int row = i / gridSize;
                     int col = i % gridSize;
 
-                    int x = col * cellWidth;
-                    int y = row * cellHeight;
+                    double x = col * cellWidth;
+                    double y = row * cellHeight;
 
-                    g.DrawImage(images[i], x, y, cellWidth, cellHeight);
+                    drawingContext.DrawImage(
+                        images[i],
+                        new System.Windows.Rect(x, y, cellWidth, cellHeight));
                 }
             }
 
-            return collage;
+            renderBitmap.Render(drawingVisual);
+            renderBitmap.Freeze();
+
+        
+            var bitmapImage = new BitmapImage();
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+
+            using (var stream = new MemoryStream())
+            {
+                encoder.Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = stream;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+            }
+
+            return bitmapImage;
         }
     }
 }
