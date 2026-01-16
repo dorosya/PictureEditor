@@ -1,10 +1,10 @@
-using System.Drawing;
+using System.Windows.Media.Imaging; 
 
 namespace PhotoEditor.Interfaces
 {
     public interface IFilter
-    {
-        Bitmap ApplyBrightness(Bitmap source, float factor);
-        Bitmap ApplyColorFilter(Bitmap source, int r, int g, int b);
+    { 
+        BitmapImage ApplyBrightness(BitmapImage source, float factor);
+        BitmapImage ApplyColorFilter(BitmapImage source, int r, int g, int b);
     }
 }

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Text.Json.Serialization;
+using System.Windows.Media.Imaging;
 using PhotoEditor.Interfaces;
+using System.Windows;
 
 namespace PhotoEditor.Models
 {
@@ -14,6 +17,9 @@ namespace PhotoEditor.Models
 
         [JsonIgnore]
         public Bitmap? Image { get; private set; }
+
+        [JsonIgnore]
+        public BitmapImage? BitmapImage { get; private set; }
 
         public Photo() { }
 
@@ -33,6 +39,32 @@ namespace PhotoEditor.Models
 
             Image?.Dispose();
             Image = new Bitmap(FilePath);
+            UpdateBitmapImage();
+        }
+
+       
+        public void UpdateBitmapImage()
+        {
+            if (Image == null)
+            {
+                BitmapImage = null;
+                return;
+            }
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                Image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                ms.Position = 0;
+
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = ms;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+
+                BitmapImage = bitmapImage;
+            }
         }
 
         public void SaveImage(string outputPath)
@@ -49,12 +81,37 @@ namespace PhotoEditor.Models
         {
             Image?.Dispose();
             Image = null;
+            BitmapImage = null;
         }
 
         public void SetImage(Bitmap bitmap)
         {
             Image?.Dispose();
             Image = bitmap;
+            UpdateBitmapImage();
+        }
+
+        public void SetImage(BitmapImage bitmapImage)
+        {
+            if (bitmapImage == null)
+            {
+                Image = null;
+                BitmapImage = null;
+                return;
+            }
+
+    
+            BitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                encoder.Save(ms);
+                ms.Position = 0;
+                Image = new Bitmap(ms);
+            }
+
+            BitmapImage = bitmapImage;
         }
 
         public override string ToString()
