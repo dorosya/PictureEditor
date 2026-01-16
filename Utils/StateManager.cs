@@ -10,42 +10,63 @@ namespace PhotoEditor.Utils
     {
         private const string StateFile = "app_state.json";
 
-        public static void SaveState(List<Photo> photos)
+        public static void SaveState(IEnumerable<Photo> photos)
         {
-            var options = new JsonSerializerOptions
+            try
             {
-                WriteIndented = true
-            };
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNameCaseInsensitive = true
+                };
 
-            string json = JsonSerializer.Serialize(photos, options);
-            File.WriteAllText(StateFile, json);
+                var photoData = new List<PhotoData>();
+                foreach (var photo in photos)
+                {
+                    photoData.Add(new PhotoData
+                    {
+                        FilePath = photo.FilePath,
+                        Name = photo.Name
+                    });
+                }
 
-            Console.WriteLine($"Состояние сохранено ({photos.Count} фото)");
+                string json = JsonSerializer.Serialize(photoData, options);
+                File.WriteAllText(StateFile, json);
+            }
+            catch { /* Игнорируем ошибки сохранения */ }
         }
 
         public static List<Photo> LoadState()
         {
             if (!File.Exists(StateFile))
+                return new List<Photo>();
+
+            try
             {
-                Console.WriteLine("Сохранённое состояние не найдено");
+                string json = File.ReadAllText(StateFile);
+                var photoData = JsonSerializer.Deserialize<List<PhotoData>>(json);
+
+                var photos = new List<Photo>();
+                foreach (var data in photoData ?? new List<PhotoData>())
+                {
+                    if (File.Exists(data.FilePath))
+                    {
+                        photos.Add(new Photo(data.FilePath));
+                    }
+                }
+
+                return photos;
+            }
+            catch
+            {
                 return new List<Photo>();
             }
-
-            string json = File.ReadAllText(StateFile);
-
-            var photos = JsonSerializer.Deserialize<List<Photo>>(json);
-
-            Console.WriteLine($"Загружено фото: {photos?.Count ?? 0}");
-            return photos ?? new List<Photo>();
         }
 
-        public static void ClearState()
+        private class PhotoData
         {
-            if (File.Exists(StateFile))
-            {
-                File.Delete(StateFile);
-                Console.WriteLine("Состояние очищено");
-            }
+            public string FilePath { get; set; }
+            public string Name { get; set; }
         }
     }
 }
