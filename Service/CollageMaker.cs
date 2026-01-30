@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Media.Imaging;
 using System.IO;
-using PhotoEditor.Interfaces;
+using PictureEditor.Interfaces;
 
-namespace PhotoEditor.Services
+namespace PictureEditor.Service
 {
     public class CollageMaker : ICollageMaker
     {

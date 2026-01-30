@@ -1,6 +1,6 @@
 using System.Drawing;
 
-namespace PhotoEditor.Interfaces
+namespace PictureEditor.Interfaces
 {
     public interface IPhoto
     {

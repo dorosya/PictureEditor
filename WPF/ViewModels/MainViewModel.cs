@@ -7,10 +7,10 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
-using PhotoEditor.Models;
-using PhotoEditor.Services;
+using PictureEditor.Models;
+using PictureEditor.Service;
 
-namespace PhotoEditor.Wpf.ViewModels
+namespace PictureEditor.WPF.ViewModels
 {
 	public class MainViewModel : INotifyPropertyChanged
 	{
@@ -20,8 +20,8 @@ namespace PhotoEditor.Wpf.ViewModels
 
 		public ObservableCollection<Photo> Photos { get; } = new ObservableCollection<Photo>();
 
-		private Photo _selectedPhoto;
-		public Photo SelectedPhoto
+		private Photo? _selectedPhoto;
+		public Photo? SelectedPhoto
 		{
 			get => _selectedPhoto;
 			set
@@ -148,7 +148,7 @@ namespace PhotoEditor.Wpf.ViewModels
 		}
 
 		// Событие для обновления интерфейса
-		public event PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler? PropertyChanged;
 		protected virtual void OnPropertyChanged(string propertyName)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -159,21 +159,21 @@ namespace PhotoEditor.Wpf.ViewModels
 	public class RelayCommand : ICommand
 	{
 		private readonly Action _execute;
-		private readonly Func<bool> _canExecute;
+		private readonly Func<bool>? _canExecute;
 
-		public RelayCommand(Action execute, Func<bool> canExecute = null)
+		public RelayCommand(Action execute, Func<bool>? canExecute = null)
 		{
 			_execute = execute ?? throw new ArgumentNullException(nameof(execute));
 			_canExecute = canExecute;
 		}
 
-		public bool CanExecute(object parameter) => _canExecute?.Invoke() ?? true;
-		public void Execute(object parameter) => _execute();
+		public bool CanExecute(object? parameter) => _canExecute?.Invoke() ?? true;
+		public void Execute(object? parameter) => _execute();
 
-		public event EventHandler CanExecuteChanged
+		public event EventHandler? CanExecuteChanged
 		{
-			add { CommandManager.RequerySuggested += value; }
-			remove { CommandManager.RequerySuggested -= value; }
+			add { if (value != null) CommandManager.RequerySuggested += value; }
+			remove { if (value != null) CommandManager.RequerySuggested -= value; }
 		}
 	}
 }

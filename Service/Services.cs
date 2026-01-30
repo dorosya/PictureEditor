@@ -1,9 +1,9 @@
 using System;
 using System.Drawing;
 using System.IO;
-using PhotoEditor.Models;
+using PictureEditor.Models;
 
-namespace PhotoEditor.Services
+namespace PictureEditor.Service
 {
     public class Service
     {

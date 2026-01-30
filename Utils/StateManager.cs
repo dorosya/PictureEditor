@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using PhotoEditor.Models;
+using PictureEditor.Models;
 
-namespace PhotoEditor.Utils
+namespace PictureEditor.Utils
 {
     public static class StateManager
     {

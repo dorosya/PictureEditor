@@ -1,6 +1,6 @@
 using System.Windows.Media.Imaging; 
 
-namespace PhotoEditor.Interfaces
+namespace PictureEditor.Interfaces
 {
     public interface IFilter
     { 
