@@ -10,6 +10,8 @@ namespace PictureEditor.Service
     {
         public BitmapSource AddText(BitmapSource source, string text, int x, int y, int fontSize, Color color)
         {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
             DrawingVisual visual = new DrawingVisual();
 
             using (DrawingContext dc = visual.RenderOpen())
